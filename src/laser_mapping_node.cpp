@@ -8,7 +8,6 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/Odometry.h>
 #include <sstream>
-#include <pcl/filters/voxel_grid.h>
 
 
 laser_geometry::LaserProjection projector_;
@@ -21,7 +20,6 @@ Eigen::Matrix4f transform;
 sensor_msgs::LaserScan scan;
 float d = 0.265f;
 
-pcl::VoxelGrid<pcl::PointXYZ> vox;
 
 void laserCallback(const sensor_msgs::LaserScan::ConstPtr& scan_in) {
   scan = *scan_in;
@@ -71,16 +69,12 @@ int main(int argc, char **argv)
 
   ros::Rate loop_rate(10);
 
-  vox.setLeafSize(0.001f, 0.001f, 0.001f);
-
   while (ros::ok())
   {
     pcl_ros::transformPointCloud(transform, cloud, cloud_tf);
 
     pcl::fromROSMsg(cloud_tf, *cloud_tf_pcl);
     *cloud_map_pcl += *cloud_tf_pcl;
-    vox.setInputCloud(cloud_map_pcl);
-    vox.filter(*cloud_map_pcl);
     pcl::toROSMsg(*cloud_map_pcl, cloud_map);
     cloud_map.header.frame_id = "base_link";
 
